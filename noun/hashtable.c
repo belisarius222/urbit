@@ -3,16 +3,19 @@
 */
 #include "all.h"
 
-c3_o RECLAIMING = c3n;
+//  #define U3H_MEMORY_DEBUG
 
 static void
-_ch_slot_put(u3h_root*, u3h_slot* sot_w, u3_noun kev, c3_w lef_w, c3_w rem_w, c3_w* use_w);
+_ch_slot_put(u3h_root*, u3h_slot*, u3_noun, c3_w, c3_w, c3_w*);
 
 static c3_o
-_ch_trim_slot(u3h_root* har_u, u3h_slot *sot_w, c3_w lef_w, c3_w rem_w);
+_ch_trim_slot(u3h_root*, u3h_slot*, c3_w, c3_w);
 
 c3_w
-_ch_skip_slot(c3_w mug_w, c3_w lef_w);
+_ch_skip_slot(c3_w, c3_w);
+
+void
+_ch_some_sane(void*, c3_w, c3_w*);
 
 /* u3h_new_cache(): create hashtable with bounded size.
 */
@@ -206,12 +209,6 @@ _ch_slot_put(u3h_root* har_u, u3h_slot* sot_w, u3_noun kev, c3_w lef_w, c3_w rem
       c3_assert(2 == sub_w);
       *use_w += 1;
       *sot_w = u3h_node_to_slot(hav_3);
-
-      if ( c3y == RECLAIMING ) {
-        fprintf(stderr,
-          "slot_put kev->node lef_w %02d hav_1 %08x hav_2 %08x hav_3 %08x\r\n",
-          lef_w, hav_v, hav_2, hav_3);
-      }
     }
   }
   else {
@@ -221,12 +218,6 @@ _ch_slot_put(u3h_root* har_u, u3h_slot* sot_w, u3_noun kev, c3_w lef_w, c3_w rem
     old_v = u3h_slot_to_node(*sot_w);
     hav_v = _ch_some_add(har_u, old_v, lef_w, rem_w, kev, use_w);
     *sot_w = u3h_node_to_slot(hav_v);
-
-    if ( c3y == RECLAIMING ) {
-      fprintf(stderr,
-        "slot_put node->node lef_w %02d old_v %08x hav_v %08x\r\n",
-        lef_w, old_v, hav_v);
-    }
   }
 }
 
@@ -274,9 +265,6 @@ _ch_trim_node(u3h_root* har_u, u3h_slot* sot_w, c3_w lef_w, c3_w rem_w)
     //  shrink!
     if ( c3y == u3h_slot_is_noun(*tos_w) && (_ch_popcount(map_w) == 1) ) {
       *sot_w = *tos_w;
-      fprintf(stderr,
-          "FREE %08x lef_w %02d raising key-value pair from sub-slot\r\n",
-          han_u, lef_w);
       u3a_wfree(han_u);
     }
 
@@ -302,9 +290,6 @@ _ch_trim_node(u3h_root* har_u, u3h_slot* sot_w, c3_w lef_w, c3_w rem_w)
 
       // raise key-value pair into self
       *sot_w = sur_w;
-      fprintf(stderr,
-          "FREE %08x lef_w %02d raising key-value pair from doubleton\r\n",
-          han_u, lef_w);
       u3a_wfree(han_u);
     }
     else {
@@ -439,13 +424,30 @@ _ch_trim_slot(u3h_root* har_u, u3h_slot *sot_w, c3_w lef_w, c3_w rem_w)
 /* _ch_trim_root(): trim one entry from a hashtable
 */
 static c3_o
-_ch_trim_root(u3h_root* har_u)
+_ch_trim_root(u3h_root* har_u, c3_o* dun_o)
 {
   c3_w      mug_w = har_u->arm_u.mug_w;
   c3_w      inx_w = mug_w >> 25; // 6 bits
+
+  // locked (mid-put)
   if ( har_u->lok_w == inx_w ) {
-    // locked (mid-put)
-    har_u->arm_u.mug_w = _ch_skip_slot(har_u->arm_u.mug_w, 25);
+    c3_w i_w;
+    *dun_o = c3y;
+
+    //  if all other slots are null, we can't trim anymore.
+    //  otherwise, just skip the current slot.
+    //
+    for ( i_w = 0; i_w < 64; i_w++ ) {
+      if ( (! _(u3h_slot_is_null(har_u->sot_w[i_w])))
+           && i_w != inx_w )
+      {
+        har_u->arm_u.mug_w = _ch_skip_slot(har_u->arm_u.mug_w, 25);
+
+        *dun_o = c3n;
+        return c3n;
+      }
+    }
+
     return c3n;
   }
   c3_w      rem_w = mug_w & ((1 << 25) - 1);
@@ -453,8 +455,6 @@ _ch_trim_root(u3h_root* har_u)
   
   return _ch_trim_slot(har_u, sot_w, 25, rem_w);
 }
-
-void _ch_some_sane(void* han_v, c3_w lef_w, c3_w* vis_w);
 
 /* _ch_node_sane(): check node integrity.
 */
@@ -559,22 +559,28 @@ u3h_sane(u3p(u3h_root) har_p)
   c3_assert( vis_w == har_u->use_w );
 }
 
-/* u3h_trim_to(): trim to n key-value pairs
+/* u3h_trim_to(): trim to n key-value pairs, or return c3n if we trimmed less.
 */
-void
+c3_o
 u3h_trim_to(u3p(u3h_root) har_p, c3_w n_w)
 {
   u3h_root* har_u = u3to(u3h_root, har_p);
+  c3_o dun_o = c3n;
 
   while ( har_u->use_w > n_w ) {
-    if ( c3y == _ch_trim_root(har_u) ) {
+    if ( c3y == _ch_trim_root(har_u, &dun_o) ) {
       har_u->use_w -= 1;
+    }
+    if ( c3y == dun_o ) {
+      return c3n;
     }
   }
 
-#if 1
+#ifdef U3H_MEMORY_DEBUG
   u3h_sane(har_p);
 #endif
+
+  return c3y;
 }
 
 /* u3h_put(): insert in hashtable.
@@ -590,22 +596,14 @@ u3h_put(u3p(u3h_root) har_p, u3_noun key, u3_noun val)
   c3_w        inx_w = (mug_w >> 25);  //  6 bits
   c3_w        rem_w = (mug_w & ((1 << 25) - 1));
 
-  c3_w use_w = har_u->use_w;
-
   // not thread safe! use a real lock if we ever get proper multithreading
   har_u->lok_w = inx_w;
   _ch_slot_put(har_u, &(har_u->sot_w[inx_w]), kev, 25, rem_w, &(har_u->use_w));
   har_u->lok_w = 64;
 
-  if ( c3y == RECLAIMING ) {
-    /*
-    if ( _(u3h_slot_is_node(har_u->sot_w[inx_w])) ) {
-      c3_w nul_w;
-      _ch_node_sane(u3h_slot_to_node(har_u->sot_w[inx_w]), 25, &nul_w);
-    }
-    */
-    u3h_sane(har_p);
-  }
+#ifdef U3H_MEMORY_DEBUG
+  u3h_sane(har_p);
+#endif
 
   if ( har_u->max_w > 0 ) {
     u3h_trim_to(har_p, har_u->max_w);

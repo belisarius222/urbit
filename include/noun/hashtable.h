@@ -128,9 +128,14 @@
         u3_weak
         u3h_gut(u3p(u3h_root) har_p, u3_noun key);
 
-      /* u3h_trim_to(): trim to n key-value pairs
+      /* u3h_sane(): check hashtable sanity
       */
         void
+        u3h_sane(u3p(u3h_root) har_p);
+
+      /* u3h_trim_to(): trim to n key-value pairs, or return c3n if impossible.
+      */
+        c3_o
         u3h_trim_to(u3p(u3h_root) har_p, c3_w n_w);
 
       /* u3h_free(): free hashtable.

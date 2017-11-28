@@ -3,8 +3,6 @@
 */
 #include "all.h"
 
-extern c3_o RECLAIMING;
-
 /* _box_count(): adjust memory count.
 */
 #ifdef  U3_CPU_DEBUG
@@ -396,7 +394,7 @@ u3a_reflux(void)
 void
 u3a_reclaim(void)
 {
-  RECLAIMING = c3y;
+  c3_o all_o;
 
   u3a_sane();
 
@@ -410,9 +408,14 @@ u3a_reclaim(void)
   fprintf(stderr, "allocate: reclaim: half of %d entries\r\n", 
                    u3to(u3h_root, u3R->cax.har_p)->use_w);
 
-  u3h_trim_to(u3R->cax.har_p, u3to(u3h_root, u3R->cax.har_p)->use_w / 2);
-
+  all_o = u3h_trim_to(u3R->cax.har_p,
+                      u3to(u3h_root, u3R->cax.har_p)->use_w / 2);
   u3a_sane();
+
+  if ( !_(all_o) ) {
+    fprintf(stderr, "allocate: reclaim: memo cache: can't trim\r\n");
+    u3m_bail(c3__meme);
+  }
 }
 
 /* _ca_willoc(): u3a_walloc() internals.
