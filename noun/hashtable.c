@@ -559,7 +559,7 @@ u3h_sane(u3p(u3h_root) har_p)
   c3_assert( vis_w == har_u->use_w );
 }
 
-/* u3h_trim_to(): trim to n key-value pairs, or return c3n if we trimmed less.
+/* u3h_trim_to(): try to trim to n items, returning c3n if trimmed fewer.
 */
 c3_o
 u3h_trim_to(u3p(u3h_root) har_p, c3_w n_w)
