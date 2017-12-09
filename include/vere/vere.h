@@ -470,6 +470,7 @@
       typedef struct {
         uv_tcp_t         wax_u;             //  TCP listener
         uv_timer_t       tim_u;             //  election/heartbeat timer
+        uv_idle_t        ile_u;             //  idle effects handler
         u3_ulog          lug_u;             //  event log
         c3_d             ent_d;             //  last log index
         c3_w             lat_w;             //  last log term
@@ -1064,6 +1065,11 @@
       */
         void
         u3_raft_init(void);
+
+      /* u3_idle_init(): start libuv idle handler.
+      */
+        void
+        u3_idle_init(void);
 
       /* u3_raft_work(): poke, kick, and push pending events.
       */

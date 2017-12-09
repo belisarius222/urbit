@@ -444,9 +444,10 @@ u3_lo_shut(c3_o inn)
 {
   // u3m_grab(u3_none);
 
+  //  XX  TODO: remove
   //  process actions
   //
-  u3_raft_work();
+  //  u3_raft_work();
 
   // u3_lo_grab("lo_shut b", u3_none);
 
@@ -646,6 +647,8 @@ u3_lo_loop()
   _lo_init();
 
   u3_raft_init();
+
+  u3_idle_init();
 
   if ( _(u3_Host.ops_u.tex) ) {
     u3t_boff();

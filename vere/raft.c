@@ -1443,6 +1443,25 @@ u3_raft_init()
   }
 }
 
+/* _raft_idler(): libuv idle handler
+*/
+void
+_raft_idler(uv_idle_t* handle)
+{
+  u3_raft_work();
+}
+
+/* u3_idle_init(): start libuv idle handler
+*/
+void
+u3_idle_init()
+{
+  u3_raft* raf_u = u3Z;
+
+  uv_idle_init(u3L, &raf_u->ile_u);
+  uv_idle_start(&raf_u->ile_u, _raft_idler);
+}
+
 /* _raft_sure(): apply and save an input ovum and its result.
 */
 static void
@@ -2006,7 +2025,7 @@ u3_raft_work(void)
     //  be with you shortly.
     {
       c3_d    bid_d;
-      c3_w    len_w;
+      c3_w    len_w, num_w;
       c3_w*   bob_w;
       u3_noun ron;
       u3_noun ovo;
@@ -2014,7 +2033,10 @@ u3_raft_work(void)
       ova = u3kb_flop(u3A->roe);
       u3A->roe = u3_nul;
 
+      num_w = 0;
+
       while ( u3_nul != ova ) {
+        num_w++;
         ovo = u3k(u3t(u3h(ova)));
         vir = u3k(u3h(u3h(ova)));
         nex = u3k(u3t(ova));
@@ -2057,6 +2079,9 @@ u3_raft_work(void)
 
           _raft_grab(ova);
         }
+      }
+      if ( 0 < num_w ) {
+        fprintf(stderr, "raft: processed %d effects\r\n", num_w);
       }
     }
   }
