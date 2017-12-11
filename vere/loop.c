@@ -655,6 +655,8 @@ u3_lo_loop()
     u3t_damp();
     u3_lo_exit();
 
+    //  XX TODO: stop idler
+
     fprintf(stderr, "dry run: exit\r\n");
     exit(0);
   }
