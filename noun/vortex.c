@@ -65,6 +65,8 @@ u3v_hose(void)
   u3A->ova.egg_p = u3A->ova.geg_p = 0;
   u3z(u3A->roe);
   u3A->roe = u3_nul;
+  u3z(u3A->doe);
+  u3A->doe = u3_nul;
 }
 
 /* u3v_start(): start time.
@@ -128,7 +130,7 @@ u3v_wish(const c3_c* str_c)
     u3z(gam); return pro;
   }
 static u3_noun
-_cv_mung(c3_w sec_w, u3_noun gat, u3_noun sam)
+_cv_mung(c3_w sec_w, u3_noun gat, u3_noun sam)   //  XX sec_w unused
 {
   u3_noun gam = u3nc(gat, sam);
 
@@ -146,7 +148,8 @@ u3v_pike(u3_noun ovo, u3_noun cor)
   return _cv_mung(0, fun, sam);
 }
 
-/* u3v_nick(): transform enveloped packets, [vir cor].
+/* u3v_nick(): unwrap enveloped packets, [vir cor].
+** Resend them into arvo if this ship is their destination.
 */
 u3_noun
 u3v_nick(u3_noun vir, u3_noun cor)
@@ -205,7 +208,7 @@ u3v_nick(u3_noun vir, u3_noun cor)
 }
 
 /* _cv_nock_poke(): call poke through hardcoded interface.
-*/
+*/   //  XX sec_w unused
 static u3_noun
 _cv_nock_poke(u3_noun ovo)
 {
@@ -527,6 +530,7 @@ u3v_mark(void)
   tot_w += u3a_mark_noun(arv_u->own);
 
   tot_w += u3a_mark_noun(arv_u->roe);
+  tot_w += u3a_mark_noun(arv_u->doe);
   tot_w += u3a_mark_noun(arv_u->key);
 
   tot_w += u3a_mark_noun(arv_u->ken);

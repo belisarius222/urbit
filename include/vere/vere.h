@@ -1076,6 +1076,11 @@
         void
         u3_raft_work(void);
 
+      /* u3_raft_chip(): poke, kick, and push one pending event.
+      */
+        void
+        u3_raft_chip(void);
+
 
     /**  Disk persistence.
     **/

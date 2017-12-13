@@ -29,7 +29,8 @@
 
         u3_noun sac;                      //  space profiling
 
-        u3_noun roe;                      //  temporary unsaved events
+        u3_noun roe;                      //  unsaved unprocessed events
+        u3_noun doe;                      //  unsaved processed events
         u3_noun key;                      //  log key, or 0
 
         u3_noun ken;                      //  kernel formula
